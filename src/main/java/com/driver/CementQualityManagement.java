@@ -10,32 +10,68 @@ public class CementQualityManagement<T extends Number> {
     private Map<String, Map<String, List<T>>> store = new HashMap<>();
 
     public String addCementBrand() {
-       // your code goes here
-        return "";
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter Brand Name: ");
+        String brandName = scanner.nextLine();
+
+        Map<String, List<T>> brandData = new HashMap<>();
+
+        while (true) {
+            System.out.print("Enter Quality Parameter Name (or 'exit' to finish): ");
+            String paramName = scanner.nextLine();
+
+            if ("exit".equalsIgnoreCase(paramName)) {
+                break;
+            }
+
+            System.out.print("Enter Quality Parameter Value: ");
+            T paramValue = parseInput(scanner.nextLine());
+
+            brandData.computeIfAbsent(paramName, k -> new ArrayList<>()).add(paramValue);
+        }
+
+        store.put(brandName, brandData);
+        return "Brand " + brandName + " added successfully!";
     }
 
     public void fetchQualityParameters(String brandName) {
-        // your code goes here
+        Map<String, List<T>> brandData = store.get(brandName);
+        if (brandData != null) {
+            for (Map.Entry<String, List<T>> entry : brandData.entrySet()) {
+                System.out.println(entry.getKey() + " = " + entry.getValue());
+            }
+        } else {
+            throw new BrandNotFoundException("Brand not found: " + brandName);
+        }
     }
 
     public double computeAverageValue(String brandName, String paramName) {
-      // your code goes here
+        List<T> values = Optional.ofNullable(store.get(brandName))
+                .map(data -> data.get(paramName))
+                .orElseThrow(() -> new ParameterNotFoundException("Parameter not found: " + paramName));
 
-        return 0;
+        return values.stream().mapToDouble(Number::doubleValue).average().orElse(0);
     }
 
     private T parseInput(String input) {
-		
-        // your code goes here
-    	return null;
+        try {
+            return (T) Double.valueOf(input);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid numeric input: " + input, e);
+        }
     }
 
     public static class BrandNotFoundException extends RuntimeException {
-        // your code goes here
+        BrandNotFoundException(String message) {
+            super(message);
+        }
     }
 
     static class ParameterNotFoundException extends RuntimeException {
-        // your code goes here
+        ParameterNotFoundException(String message) {
+            super(message);
+        }
     }
 
     public static void main(String[] args) {
@@ -61,11 +97,10 @@ public class CementQualityManagement<T extends Number> {
         scanner.close();
     }
 
-	public void addCementBrandWithQualityParameters(String brandName, String string, int i) {
-		// TODO Auto-generated method stub
-		
-	}
-}
+    public void addCementBrandWithQualityParameters(String brandName, String string, int i) {
+        // TODO Auto-generated method stub
 
+    }
+}
 
 
